@@ -54,11 +54,19 @@ class MainActivity : AppCompatActivity() {
         //取出字符串并转向saveInDb()中
         val mainOutline= intent.getStringExtra("OUTLINE").toString()
         val mainContent=intent.getStringExtra("CONTENT").toString()
-        Log.d(TAG,"mainOutline as ${mainOutline} mainContent as $mainContent ")
-        saveInDb(mainContent,mainOutline)
-    }
+        val item_id= intent.getStringExtra("item_id")?.toInt()
 
-    private fun saveInDb(text: String, outline: String) {
+
+        Log.d(TAG,"mainOutline as ${mainOutline} mainContent as $mainContent id as ${item_id}")
+        if (item_id != null) {
+            updateindb(mainContent,mainOutline,item_id)
+        }
+        else
+        {
+            saveInDb(mainContent,mainOutline)
+        }
+    }
+    private fun saveInDb(text: String, outline: String,) {
         //往数据库存数据！！！
         Log.d(TAG, "get in edit=$text  outline=$outline")
         val db = helper.writableDatabase
@@ -69,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             put(Todo.COL_TIME, item.createTime)
         }
         var rs = -1
-
+        Log.d(TAG,"这里这里$toUpdate")
         if (toUpdate != null) {
             item.id = toUpdate?.id
             Log.d(TAG, "UPDATE ID=$rs")
@@ -91,12 +99,54 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun setInputText(content: String,outline:String) {
+    private fun updateindb(text: String, outline: String,item_id:Int) {
+        //往数据库存数据！！！
+        Log.d(TAG, "get in edit=$text  outline=$outline")
+        val db = helper.writableDatabase
+        val item = Todo(outline,text, System.currentTimeMillis())
+        val values = ContentValues().apply {
+            put(Todo.COL_OUTLINE,item.outline)
+            put(Todo.COL_CONTENT, item.content)
+            put(Todo.COL_TIME, item.createTime)
+        }
+        var rs = -1
+        Log.d(TAG,"这里这里$toUpdate")
+        if (item_id != null) {
+            item.id = item_id
+            Log.d(TAG, "UPDATE ID=$rs")
+            rs = db.update(Todo.TABLE, values, "id=?", arrayOf(item_id.toString()))
+            if (rs != -1) {
+                item_id.let { adapter.replaceItem(it, item) }
+               // toUpdate = null
+            }
+        } else {
+            Log.d(TAG, "insert id =$rs")
+            rs = db.insert(Todo.TABLE, null, values).toInt()
+            Log.d(TAG, "insert id =$rs")
+            if (rs != -1) {
+                item.id = rs
+                adapter.addItem(item)
+            }
+        }
+        Toast.makeText(this, if (rs < 0) "保存失败" else "保存成功", Toast.LENGTH_LONG).show()
 
-        Log.d(TAG, "content=$content, outline=$outline")
-        val context=this
-        startActivity(Intent(context,EditActivity::class.java))
+    }
 
+    private fun setInputText(o_content: String,o_outline:String,item_id: Int?) {
+
+        Log.d(TAG, "content=$o_content, outline=$o_outline")
+        //findViewById<EditText>(R.id.ipt_text).setText(s)
+
+//        Log.d(TAG, "outline as $o_outline content as $o_content")
+        val i = Intent(this@MainActivity, EditActivity::class.java) //建立Intent
+
+        i.putExtra("OLD_OUTLINE", o_outline)
+        i.putExtra("OLD_CONTENT", o_content) //传递两个参数
+        i.putExtra("item_id",item_id) //传递两个参数
+
+
+        Log.d(TAG, "send outline as $o_outline content as $o_content id as $item_id")
+        startActivity(i)
     }
     @SuppressLint("Range")
     private fun readInDb() {
@@ -241,7 +291,10 @@ class MainActivity : AppCompatActivity() {
              btnUpdate?.setOnClickListener {
                  Log.d(TAG, "to Update id=${todo.id}")
                  toUpdate = todo
-                 setInputText(todo.content)
+                 ///获取outline和content参数
+                 Log.d(TAG, "最初=${toUpdate}")
+                 setInputText(todo.content,todo.outline,todo.id)
+
              }
         }
     }
