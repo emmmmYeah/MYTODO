@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class EditActivity : AppCompatActivity() {
     val TAG = "@@EditActivity"
-    //var id: Int? =null
+//    var id: String? =null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "trans successfully")
@@ -18,43 +18,48 @@ class EditActivity : AppCompatActivity() {
 
         val o_Outline= intent.getStringExtra("OLD_OUTLINE").toString()
         val o_Content=intent.getStringExtra("OLD_CONTENT").toString()
-        var id= intent.getStringExtra("item_id")?.toString()
+        val id= intent.getStringExtra("item_id")
         Log.d(TAG,"mainOutline as ${o_Outline} mainContent as $o_Content  id as $id")
         if (id != null) {
-            setEditText(o_Outline,o_Content,id.toInt())
+            Log.d(TAG,"id as ${id}")
+            setEditText(o_Outline,o_Content)
         }
         else
         {
-            setEditText(o_Outline,o_Content,null)
+            setEditText(o_Outline,o_Content)
         }
-        initData()
+    if (id != null) {
+        initData(id)
+    }
+    else{
+        initData(null)
+    }
 
 
     }
 
-    private fun setEditText(oOutline: String, oContent: String, item_id: Int?) {
+    private fun setEditText(oOutline: String, oContent: String) {
         findViewById<EditText>(R.id.ipt_outline).setText(oOutline)
         findViewById<EditText>(R.id.ipt_content).setText(oContent)
-        if (item_id != null) {
-            findViewById<TextView>(R.id.item_id).setText(item_id)
-        }
+
 
 
     }
 
 
-    private fun initData() {
+    private fun initData(item_id: String?) {
 
         findViewById<Button>(R.id.btn_save).setOnClickListener {
             val outline = findViewById<TextView>(R.id.ipt_outline).text.toString();
             val content = findViewById<TextView>(R.id.ipt_content).text.toString();
-            val item_id = findViewById<TextView>(R.id.item_id).text.toString();
+
             Log.d(TAG, "outline as $outline content as $content")
             val i = Intent(this@EditActivity, MainActivity::class.java) //建立Intent
 
             i.putExtra("OUTLINE", outline)
             i.putExtra("CONTENT", content) //传递两个参数
-            i.putExtra("id", item_id.toInt()) //传递两个参数
+            i.putExtra("item_id", item_id) //传递两个参数
+
             Log.d(TAG, "send outline as $outline content as $content id as $item_id")
             startActivity(i)
         }

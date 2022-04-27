@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             put(Todo.COL_TIME, item.createTime)
         }
         var rs = -1
-        Log.d(TAG,"这里这里$toUpdate")
+        //Log.d(TAG,"这里这里$toUpdate")
         if (toUpdate != null) {
             item.id = toUpdate?.id
             Log.d(TAG, "UPDATE ID=$rs")
@@ -142,10 +142,10 @@ class MainActivity : AppCompatActivity() {
 
         i.putExtra("OLD_OUTLINE", o_outline)
         i.putExtra("OLD_CONTENT", o_content) //传递两个参数
-        i.putExtra("item_id",item_id) //传递两个参数
+        i.putExtra("item_id",item_id.toString()) //传递两个参数
 
 
-        Log.d(TAG, "send outline as $o_outline content as $o_content id as $item_id")
+        Log.d(TAG, "send outline as $o_outline content as $o_content id as ${item_id.toString()}")
         startActivity(i)
     }
     @SuppressLint("Range")
